@@ -281,7 +281,7 @@ class MacOSSpotifyMonitor():
         while True:
             ad = self.is_ad_playing()
             current_title = self.get_spotify_info()['track']
-            print(current_title)
+            # print(current_title)
             if ad and self.is_muted is not True:
                 print(f"Ad detected (title: {current_title}), muting audio.")
                 self.mute()
