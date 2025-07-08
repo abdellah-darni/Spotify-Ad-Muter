@@ -6,6 +6,7 @@ class MacOSSpotifyMonitor():
     def __init__(self):
         self.is_muted = False
         self.spotify_volume = 50
+        self.current_title = None
 
     POLL_INTERVAL = 1.0
 
@@ -96,7 +97,7 @@ class MacOSSpotifyMonitor():
 
             if result.returncode == 0:
                 self.is_muted = True
-                print(f"Spotify muted")
+                print(f"Ad detected (title: {self.current_title}), muting audio.")
                 return True
 
             else:
@@ -104,7 +105,7 @@ class MacOSSpotifyMonitor():
 
                 if fallback.returncode == 0:
                     self.is_muted = True
-                    print(f"System muted")
+                    print(f"Ad detected (title: {self.current_title}), muting audio.")
                     return True
 
         except Exception as e:
@@ -141,7 +142,7 @@ class MacOSSpotifyMonitor():
 
             if result.returncode == 0:
                 self.is_muted = False
-                print(f"Spotify unmuted")
+                print(f"Music playing (title: {self.current_title}), unmuting audio.")
                 return True
 
             else:
@@ -149,9 +150,8 @@ class MacOSSpotifyMonitor():
 
                 if fallback.returncode == 0:
                     self.is_muted = False
-                    print(f"System unmuted")
+                    print(f"Music playing (title: {self.current_title}), unmuting audio.")
                     return True
-
         except Exception as e:
             print(f"[ERROR] unmuting : {e}")
         return False
@@ -169,16 +169,22 @@ class MacOSSpotifyMonitor():
 
 
     def run(self):
-        print("Starting Spotify ad muter...")
+        print("Starting  Spotify ad muter for MacOS...")
+        print("--------------")
+
+        last_played = None
         while True:
             ad = self.is_ad_playing()
-            current_title = self.get_spotify_info()['track']
-            # print(current_title)
+            self.current_title = self.get_spotify_info()['track']
+
+            if (self.current_title != last_played):
+                last_played = self.current_title
+                print(f"Current title: {self.current_title}")
+                print("---")
+
             if ad and self.is_muted is not True:
-                print(f"Ad detected (title: {current_title}), muting audio.")
                 self.mute()
             elif not ad and self.is_muted is not False:
-                print(f"Music playing (title: {current_title}), unmuting audio.")
                 self.unmute()
             time.sleep(self.POLL_INTERVAL)
 

@@ -7,6 +7,10 @@ class HyprlandSotifyMonitor:
     POLL_INTERVAL = 1.0
     SPOTIFY_APP_CLASS = "Spotify"
 
+    def __init__(self):
+        self.current_title = None
+        self.is_muted = None
+
     def input_to_list_of_dict(self, input_str: str) -> list[dict]:
         segments = input_str.split("Sink Input #")
 
@@ -63,10 +67,13 @@ class HyprlandSotifyMonitor:
                 if prop["application.name"] == "spotify":
                     stream_id = stream['Sink Input']
                     subprocess.call(['pactl', 'set-sink-input-mute', stream_id, flag])
-                    print(f"Spotify stream, id : {stream_id}")
         except Exception as e:
             subprocess.call(['pactl', 'set-sink-mute', '@DEFAULT_SINK@', flag])
-            print(f"failed to detect Spotify stream, switching to System stream: {e}")
+
+        if flag:
+            print(f"Ad detected (title: {self.current_title}), muting audio.")
+        else:
+            print(f"Music playing (title: {self.current_title}), unmuting audio.")
 
 
     def get_spotify_window_title(self):
@@ -93,17 +100,24 @@ class HyprlandSotifyMonitor:
         return False
 
     def run(self):
-        last_played_is_muted = None
-        print("Starting Spotify ad muter...")
+        print("Starting  Spotify ad muter for Hyprland (Linux)...")
+        print("Note: This only works on Hyprland builds.")
+        print("--------------")
+
+        last_played = None
         while True:
             ad = self.is_ad_playing()
-            current_title = self.get_spotify_window_title()
-            if ad and last_played_is_muted is not True:
-                print(f"Ad detected (title: {current_title}), muting audio.")
+            self.current_title = self.get_spotify_window_title()
+
+            if (self.current_title != last_played):
+                last_played = self.current_title
+                print(f"Current title: {self.current_title}")
+                print("---")
+
+            if ad and self.is_muted is not True:
                 self.set_mute(True)
-                last_played_is_muted = True
-            elif not ad and last_played_is_muted is not False:
-                print(f"Music playing (title: {current_title}), unmuting audio.")
+                self.is_muted = True
+            elif not ad and self.is_muted is not False:
                 self.set_mute(False)
-                last_played_is_muted = False
+                self.is_muted = False
             time.sleep(self.POLL_INTERVAL)
