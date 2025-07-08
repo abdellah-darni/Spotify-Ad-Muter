@@ -120,7 +120,6 @@ This tool is for educational and personal use only. It interacts with Spotify's 
 
 If you encounter any issues or have questions:
 - Open an issue on GitHub
-- Check the troubleshooting section above
 - Make sure you're using a supported platform
 
 ---
