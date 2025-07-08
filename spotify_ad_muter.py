@@ -15,6 +15,11 @@ def main():
         print(f"[INFO] {system} ")
         hypr = HyprlandSotifyMonitor()
         hypr.run()
+    elif system == 'Windows':
+        from WindowsMonitor import WindowsSpotifyMonitor
+        print(f"[INFO] {system} ")
+        win = WindowsSpotifyMonitor()
+        win.run()
 
 if __name__ == '__main__':
     main()
